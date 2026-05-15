@@ -2,7 +2,7 @@
 
 **A lightweight customer support portal built with Next.js 16, Supabase, Auth.js v5, and Resend.**
 
-> Live demo: [https://your-deployment-url.vercel.app](https://your-deployment-url.vercel.app)
+> Live demo: [https://supportdesk-lite-jet.vercel.app](https://supportdesk-lite-jet.vercel.app)
 > Admin credentials: `admin@example.com` / `password123`
 
 ---
