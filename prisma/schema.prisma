@@ -1,0 +1,238 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../apps/web/src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String         @id @default(cuid())
+  name          String?
+  email         String?        @unique
+  emailVerified DateTime?
+  image         String?
+  stripeCustomerId String?     @unique
+  accounts      Account[]
+  sessions      Session[]
+  memberships   Membership[]
+  subscriptions Subscription[]
+  apiKeys       ApiKey[]
+  apiUsage      ApiUsage[]
+  bookings      Booking[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+model Organization {
+  id          String       @id @default(cuid())
+  name        String
+  slug        String       @unique
+  memberships Membership[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Membership {
+  id             String       @id @default(cuid())
+  userId         String
+  organizationId String
+  role           Role         @default(MEMBER)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+}
+
+model Service {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  durationMin Int
+  priceCents  Int?
+  isActive    Boolean   @default(true)
+  bookings    Booking[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Staff {
+  id        String    @id @default(cuid())
+  name      String
+  email     String?
+  isActive  Boolean   @default(true)
+  bookings  Booking[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model AvailabilityRule {
+  id        String @id @default(cuid())
+  staffId   String
+  weekday   Int
+  startTime String
+  endTime   String
+  timezone  String
+}
+
+model AvailabilityException {
+  id        String   @id @default(cuid())
+  staffId   String
+  date      DateTime
+  startTime String?
+  endTime   String?
+  isClosed  Boolean  @default(false)
+}
+
+model Booking {
+  id              String        @id @default(cuid())
+  serviceId       String
+  staffId         String?
+  userId          String?
+  customerName    String
+  customerEmail   String
+  customerPhone   String?
+  startAt         DateTime
+  endAt           DateTime
+  status          BookingStatus @default(PENDING)
+  paymentStatus   PaymentStatus @default(NOT_REQUIRED)
+  stripeSessionId String?
+  service         Service       @relation(fields: [serviceId], references: [id])
+  staff           Staff?        @relation(fields: [staffId], references: [id])
+  user            User?         @relation(fields: [userId], references: [id])
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([startAt])
+  @@index([customerEmail])
+}
+
+model Subscription {
+  id                   String   @id @default(cuid())
+  userId               String
+  stripeCustomerId     String
+  stripeSubscriptionId String   @unique
+  plan                 Plan
+  status               String
+  currentPeriodEnd     DateTime?
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model ApiProduct {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ApiKey {
+  id         String    @id @default(cuid())
+  userId     String
+  name       String
+  prefix     String
+  hashedKey  String
+  scopes     String[]
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  usage      ApiUsage[]
+  createdAt  DateTime  @default(now())
+
+  @@index([userId])
+  @@index([prefix])
+}
+
+model ApiUsage {
+  id         String   @id @default(cuid())
+  userId     String
+  apiKeyId   String?
+  endpoint   String
+  method     String
+  statusCode Int
+  latencyMs  Int?
+  units      Int      @default(1)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  apiKey     ApiKey?  @relation(fields: [apiKeyId], references: [id])
+  createdAt  DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([apiKeyId, createdAt])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  action    String
+  target    String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  ADMIN
+  OWNER
+  MEMBER
+  CUSTOMER
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+enum PaymentStatus {
+  NOT_REQUIRED
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum Plan {
+  FREE
+  PRO
+  BUSINESS
+  ENTERPRISE
+}
