@@ -7,7 +7,7 @@ import { z } from "zod";
 
 import { TicketCreatedEmail } from "@/emails/ticket-created";
 import { TicketStatusUpdatedEmail } from "@/emails/ticket-status-updated";
-import { TicketCategory, TicketPriority, TicketStatus } from "@/generated/prisma";
+import { TicketCategory, TicketPriority, TicketStatus } from "@/lib/ticket-types";
 import { requireDashboardAccess } from "@/lib/dashboard-auth";
 import { supabase } from "@/lib/supabase";
 import { sendTransactionalEmail } from "@/lib/email/resend";
