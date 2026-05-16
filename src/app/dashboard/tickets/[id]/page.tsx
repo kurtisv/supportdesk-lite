@@ -13,17 +13,17 @@ import { supabase } from "@/lib/supabase";
 import { getT } from "@/lib/i18n";
 
 const statusStyles: Record<string, string> = {
-  OPEN: "bg-blue-100 text-blue-700",
-  IN_PROGRESS: "bg-purple-100 text-purple-700",
-  RESOLVED: "bg-green-100 text-green-700",
-  CLOSED: "bg-gray-100 text-gray-600",
+  OPEN: "bg-primary-soft text-primary",
+  IN_PROGRESS: "bg-accent-soft text-accent-foreground",
+  RESOLVED: "bg-success-soft text-success",
+  CLOSED: "bg-muted text-muted-foreground",
 };
 
 const priorityStyles: Record<string, string> = {
-  URGENT: "bg-red-100 text-red-700",
-  HIGH: "bg-orange-100 text-orange-700",
-  MEDIUM: "bg-yellow-100 text-yellow-700",
-  LOW: "bg-gray-100 text-gray-600",
+  URGENT: "bg-destructive-soft text-destructive",
+  HIGH: "bg-warning-soft text-warning",
+  MEDIUM: "bg-accent-soft text-accent-foreground",
+  LOW: "bg-muted text-muted-foreground",
 };
 
 export default async function TicketDetailPage({
@@ -58,13 +58,13 @@ export default async function TicketDetailPage({
         <h1 className="text-2xl font-semibold">{ticket.subject}</h1>
 
         <div className="mt-2 flex flex-wrap gap-2">
-          <span className={`inline-flex items-center px-2 py-0.5 text-xs font-medium ${statusStyles[ticket.status] ?? "bg-gray-100 text-gray-600"}`}>
+          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusStyles[ticket.status] ?? "bg-muted text-muted-foreground"}`}>
             {td.statusLabels[ticket.status as keyof typeof td.statusLabels] ?? ticket.status}
           </span>
-          <span className={`inline-flex items-center px-2 py-0.5 text-xs font-medium ${priorityStyles[ticket.priority] ?? "bg-gray-100 text-gray-600"}`}>
+          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${priorityStyles[ticket.priority] ?? "bg-muted text-muted-foreground"}`}>
             {td.priorityLabels[ticket.priority as keyof typeof td.priorityLabels] ?? ticket.priority}
           </span>
-          <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600">
+          <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
             {td.categoryLabels[ticket.category as keyof typeof td.categoryLabels] ?? ticket.category}
           </span>
         </div>
@@ -73,7 +73,7 @@ export default async function TicketDetailPage({
           {/* Main content */}
           <div className="space-y-8">
             {/* Description */}
-            <section className="border bg-background p-5">
+            <section className="rounded-md border bg-card p-5 shadow-sm">
               <div className="mb-3 flex items-center justify-between">
                 <p className="text-sm font-medium">{ticket.requesterName}</p>
                 <p className="text-xs text-muted-foreground">
@@ -94,7 +94,7 @@ export default async function TicketDetailPage({
                 {comments.map((comment) => (
                   <div
                     key={comment.id}
-                    className={`border p-4 ${comment.isInternal ? "border-dashed bg-muted/40" : "bg-background"}`}
+                    className={`rounded-md border p-4 ${comment.isInternal ? "border-dashed bg-accent-soft/70" : "bg-card"}`}
                   >
                     <div className="mb-2 flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
@@ -116,7 +116,7 @@ export default async function TicketDetailPage({
             )}
 
             {/* Add comment */}
-            <section className="border bg-background p-5">
+            <section className="rounded-md border bg-card p-5 shadow-sm">
               <h2 className="mb-4 text-sm font-semibold">{td.addCommentTitle}</h2>
               <form action={addTicketComment} className="space-y-4">
                 <input type="hidden" name="ticketId" value={ticket.id} />
@@ -138,7 +138,7 @@ export default async function TicketDetailPage({
           {/* Sidebar */}
           <aside className="space-y-4">
             {/* Requester info */}
-            <div className="border bg-background p-4">
+            <div className="rounded-md border bg-card p-4 shadow-sm">
               <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                 {td.requesterTitle}
               </p>
@@ -150,7 +150,7 @@ export default async function TicketDetailPage({
             </div>
 
             {/* Update status */}
-            <div className="border bg-background p-4">
+            <div className="rounded-md border bg-card p-4 shadow-sm">
               <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                 {td.statusTitle}
               </p>
@@ -159,7 +159,7 @@ export default async function TicketDetailPage({
                 <select
                   name="status"
                   defaultValue={ticket.status}
-                  className="flex h-9 w-full border bg-background px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                  className="flex h-9 w-full rounded-md border border-border bg-card px-3 text-sm focus:border-accent focus:outline-none"
                 >
                   {td.statusOptions.map((o) => (
                     <option key={o.value} value={o.value}>{o.label}</option>
@@ -172,7 +172,7 @@ export default async function TicketDetailPage({
             </div>
 
             {/* Update priority */}
-            <div className="border bg-background p-4">
+            <div className="rounded-md border bg-card p-4 shadow-sm">
               <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                 {td.priorityTitle}
               </p>
@@ -181,7 +181,7 @@ export default async function TicketDetailPage({
                 <select
                   name="priority"
                   defaultValue={ticket.priority}
-                  className="flex h-9 w-full border bg-background px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                  className="flex h-9 w-full rounded-md border border-border bg-card px-3 text-sm focus:border-accent focus:outline-none"
                 >
                   {td.priorityOptions.map((o) => (
                     <option key={o.value} value={o.value}>{o.label}</option>

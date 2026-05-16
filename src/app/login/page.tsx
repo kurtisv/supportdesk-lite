@@ -21,7 +21,7 @@ export default async function LoginPage({
   const params = await searchParams;
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-muted px-6 py-12">
+    <main className="flex min-h-screen items-center justify-center bg-[linear-gradient(135deg,#fbfaf7_0%,#f7efe2_58%,#f3e6e9_100%)] px-6 py-12">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Connexion</CardTitle>
@@ -29,7 +29,7 @@ export default async function LoginPage({
         </CardHeader>
         <CardContent>
           {params.error ? (
-            <p className="mb-4 border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            <p className="mb-4 rounded-md border border-destructive/25 bg-destructive-soft px-3 py-2 text-sm text-destructive">
               Identifiants invalides.
             </p>
           ) : null}

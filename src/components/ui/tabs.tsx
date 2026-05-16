@@ -7,14 +7,14 @@ export function Tabs({ className, ...props }: React.HTMLAttributes<HTMLDivElemen
 }
 
 export function TabsList({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("inline-flex w-fit border bg-muted p-1", className)} {...props} />;
+  return <div className={cn("inline-flex w-fit rounded-md border bg-muted p-1", className)} {...props} />;
 }
 
 export function TabsTrigger({ className, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <button
       type="button"
-      className={cn("h-8 border border-transparent px-3 text-sm font-medium hover:bg-background", className)}
+      className={cn("h-8 rounded border border-transparent px-3 text-sm font-medium hover:bg-card", className)}
       {...props}
     />
   );

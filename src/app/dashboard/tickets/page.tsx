@@ -4,17 +4,17 @@ import { supabase } from "@/lib/supabase";
 import { getT } from "@/lib/i18n";
 
 const statusStyles: Record<string, string> = {
-  OPEN: "bg-blue-100 text-blue-700",
-  IN_PROGRESS: "bg-purple-100 text-purple-700",
-  RESOLVED: "bg-green-100 text-green-700",
-  CLOSED: "bg-gray-100 text-gray-600",
+  OPEN: "bg-primary-soft text-primary",
+  IN_PROGRESS: "bg-accent-soft text-accent-foreground",
+  RESOLVED: "bg-success-soft text-success",
+  CLOSED: "bg-muted text-muted-foreground",
 };
 
 const priorityStyles: Record<string, string> = {
-  URGENT: "bg-red-100 text-red-700",
-  HIGH: "bg-orange-100 text-orange-700",
-  MEDIUM: "bg-yellow-100 text-yellow-700",
-  LOW: "bg-gray-100 text-gray-600",
+  URGENT: "bg-destructive-soft text-destructive",
+  HIGH: "bg-warning-soft text-warning",
+  MEDIUM: "bg-accent-soft text-accent-foreground",
+  LOW: "bg-muted text-muted-foreground",
 };
 
 export default async function TicketsPage() {
@@ -44,7 +44,7 @@ export default async function TicketsPage() {
           </Link>
         </div>
 
-        <div className="border bg-background">
+        <div className="overflow-hidden rounded-md border bg-card shadow-sm">
           {tickets.length === 0 ? (
             <p className="px-5 py-12 text-center text-sm text-muted-foreground">{tk.noTickets}</p>
           ) : (
@@ -62,7 +62,7 @@ export default async function TicketsPage() {
               </thead>
               <tbody>
                 {tickets.map((ticket) => (
-                  <tr key={ticket.id} className="border-b last:border-b-0 hover:bg-muted/40">
+                  <tr key={ticket.id} className="border-b last:border-b-0 hover:bg-accent-soft/50">
                     <td className="px-5 py-3 font-medium">{ticket.subject}</td>
                     <td className="px-5 py-3">
                       <p className="text-foreground">{ticket.requesterName}</p>
@@ -72,12 +72,12 @@ export default async function TicketsPage() {
                       {tk.categoryLabels[ticket.category as keyof typeof tk.categoryLabels] ?? ticket.category}
                     </td>
                     <td className="px-5 py-3">
-                      <span className={`inline-flex items-center px-2 py-0.5 text-xs font-medium ${priorityStyles[ticket.priority] ?? "bg-gray-100 text-gray-600"}`}>
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${priorityStyles[ticket.priority] ?? "bg-muted text-muted-foreground"}`}>
                         {tk.priorityLabels[ticket.priority as keyof typeof tk.priorityLabels] ?? ticket.priority}
                       </span>
                     </td>
                     <td className="px-5 py-3">
-                      <span className={`inline-flex items-center px-2 py-0.5 text-xs font-medium ${statusStyles[ticket.status] ?? "bg-gray-100 text-gray-600"}`}>
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusStyles[ticket.status] ?? "bg-muted text-muted-foreground"}`}>
                         {tk.statusLabels[ticket.status as keyof typeof tk.statusLabels] ?? ticket.status}
                       </span>
                     </td>

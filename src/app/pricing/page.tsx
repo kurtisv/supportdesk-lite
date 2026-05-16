@@ -19,10 +19,10 @@ export default async function PricingPage() {
 
   return (
     <MarketingPageShell>
-      <Section>
-        <h1 className="text-4xl font-semibold">{p.title}</h1>
+      <Section className="bg-[linear-gradient(135deg,#fbfaf7_0%,#f7efe2_58%,#fbfaf7_100%)]">
+        <h1 className="text-4xl font-semibold text-primary">{p.title}</h1>
         <p className="mt-4 max-w-2xl text-muted-foreground">{p.subtitle}</p>
-        <p className="mt-2 text-sm text-muted-foreground border bg-muted/40 px-3 py-2 inline-block">
+        <p className="mt-2 inline-block rounded-md border bg-accent-soft px-3 py-2 text-sm text-accent-foreground">
           {p.demoNotice}{" "}
           <Link href="/case-study" className="underline underline-offset-4">
             {p.readCaseStudy}
@@ -35,7 +35,7 @@ export default async function PricingPage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>{plan.name}</CardTitle>
-                  {plan.name === "Pro" ? <Badge>{p.popular}</Badge> : null}
+                  {plan.name === "Pro" ? <Badge className="border-primary/20 bg-primary-soft text-primary">{p.popular}</Badge> : null}
                 </div>
               </CardHeader>
               <CardContent>
@@ -47,7 +47,7 @@ export default async function PricingPage() {
                 <ul className="mt-4 grid gap-1.5">
                   {p.plans[plan.planKey].features.map((f) => (
                     <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
-                      <span className="mt-2 size-1.5 shrink-0 rounded-full bg-foreground/40" />
+                      <span className="mt-2 size-1.5 shrink-0 rounded-full bg-accent" />
                       {f}
                     </li>
                   ))}

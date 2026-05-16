@@ -21,14 +21,19 @@ export default async function CaseStudyPage() {
 
   return (
     <MarketingPageShell>
-      <main className="mx-auto max-w-3xl px-6 py-16">
-        <p className="mb-2 text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">
-          {c.label}
-        </p>
-        <h1 className="text-4xl font-semibold">SupportDesk Lite</h1>
-        <p className="mt-4 text-lg text-muted-foreground">{c.subtitle}</p>
+      <main>
+        <section className="border-b bg-[linear-gradient(135deg,#fbfaf7_0%,#f7efe2_56%,#f3e6e9_100%)]">
+          <div className="mx-auto max-w-3xl px-6 py-16">
+            <p className="mb-2 text-sm font-medium uppercase tracking-[0.18em] text-primary">
+              {c.label}
+            </p>
+            <h1 className="text-4xl font-semibold">SupportDesk Lite</h1>
+            <p className="mt-4 text-lg leading-8 text-muted-foreground">{c.subtitle}</p>
+          </div>
+        </section>
 
-        <section className="mt-12">
+        <div className="mx-auto max-w-3xl px-6 py-14">
+        <section>
           <h2 className="text-xl font-semibold">{c.problemTitle}</h2>
           <p className="mt-3 text-muted-foreground leading-7">{c.problemDesc}</p>
         </section>
@@ -43,7 +48,7 @@ export default async function CaseStudyPage() {
           <ul className="mt-4 grid gap-2">
             {c.features.map((item) => (
               <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
-                <span className="mt-2 size-1.5 shrink-0 rounded-full bg-foreground/40" />
+                <span className="mt-2 size-1.5 shrink-0 rounded-full bg-accent" />
                 {item}
               </li>
             ))}
@@ -54,8 +59,8 @@ export default async function CaseStudyPage() {
           <h2 className="text-xl font-semibold">{c.stackTitle}</h2>
           <div className="mt-4 grid gap-3">
             {techStack.map((tech) => (
-              <div key={tech.name} className="border bg-card p-4">
-                <p className="text-sm font-medium">{tech.name}</p>
+              <div key={tech.name} className="rounded-md border bg-card p-4 shadow-sm">
+                <p className="text-sm font-medium text-primary">{tech.name}</p>
                 <p className="mt-0.5 text-sm text-muted-foreground">{tech.note}</p>
               </div>
             ))}
@@ -67,14 +72,14 @@ export default async function CaseStudyPage() {
           <ul className="mt-4 grid gap-2">
             {c.demonstrates.map((item) => (
               <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
-                <span className="mt-2 size-1.5 shrink-0 rounded-full bg-foreground/40" />
+                <span className="mt-2 size-1.5 shrink-0 rounded-full bg-accent" />
                 {item}
               </li>
             ))}
           </ul>
         </section>
 
-        <section className="mt-10 border bg-muted/40 p-6">
+        <section className="mt-10 rounded-md border bg-accent-soft p-6">
           <h2 className="font-semibold">{c.boilerplateTitle}</h2>
           <p className="mt-2 text-sm text-muted-foreground leading-6">
             {c.boilerplateDesc.split("kv-web-starter").map((part, i) =>
@@ -97,6 +102,7 @@ export default async function CaseStudyPage() {
           <Button asChild variant="secondary">
             <Link href="/dashboard">{c.adminDashboard}</Link>
           </Button>
+        </div>
         </div>
       </main>
     </MarketingPageShell>

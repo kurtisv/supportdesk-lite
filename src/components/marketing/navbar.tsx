@@ -16,17 +16,20 @@ export async function Navbar() {
   ];
 
   return (
-    <header className="border-b bg-background">
+    <header className="border-b bg-card/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-        <Link href="/" className="text-base font-semibold">
-          SupportDesk Lite
+        <Link href="/" className="flex items-center gap-2 text-base font-semibold">
+          <span className="grid size-7 place-items-center rounded-md bg-primary text-xs font-semibold text-primary-foreground">
+            SD
+          </span>
+          <span>SupportDesk Lite</span>
         </Link>
         <nav className="hidden items-center gap-6 md:flex">
           {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="text-sm text-muted-foreground hover:text-foreground"
+              className="text-sm text-muted-foreground hover:text-primary"
             >
               {item.label}
             </Link>

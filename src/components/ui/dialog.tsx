@@ -7,7 +7,7 @@ export function Dialog({ className, ...props }: React.HTMLAttributes<HTMLDivElem
 }
 
 export function DialogContent({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("border bg-card p-6 shadow-lg", className)} {...props} />;
+  return <div className={cn("rounded-md border bg-card p-6 shadow-lg", className)} {...props} />;
 }
 
 export function DialogHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {

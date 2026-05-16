@@ -8,10 +8,10 @@ export async function Footer() {
   const t = translations[lang].footer;
 
   return (
-    <footer className="border-t bg-background">
+    <footer className="border-t bg-accent-soft/60">
       <div className="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-10 text-sm text-muted-foreground sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="font-medium text-foreground">SupportDesk Lite</p>
+          <p className="font-medium text-primary">SupportDesk Lite</p>
           <p className="mt-2 max-w-xs">{t.description}</p>
         </div>
         <div className="grid gap-2">

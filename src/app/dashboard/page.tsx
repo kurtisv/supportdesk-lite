@@ -40,16 +40,16 @@ export default async function DashboardPage() {
   ];
 
   const statusStyles: Record<string, string> = {
-    OPEN: "bg-blue-100 text-blue-700",
-    IN_PROGRESS: "bg-purple-100 text-purple-700",
-    RESOLVED: "bg-green-100 text-green-700",
-    CLOSED: "bg-gray-100 text-gray-600",
+    OPEN: "bg-primary-soft text-primary",
+    IN_PROGRESS: "bg-accent-soft text-accent-foreground",
+    RESOLVED: "bg-success-soft text-success",
+    CLOSED: "bg-muted text-muted-foreground",
   };
   const priorityStyles: Record<string, string> = {
-    URGENT: "bg-red-100 text-red-700",
-    HIGH: "bg-orange-100 text-orange-700",
-    MEDIUM: "bg-yellow-100 text-yellow-700",
-    LOW: "bg-gray-100 text-gray-600",
+    URGENT: "bg-destructive-soft text-destructive",
+    HIGH: "bg-warning-soft text-warning",
+    MEDIUM: "bg-accent-soft text-accent-foreground",
+    LOW: "bg-muted text-muted-foreground",
   };
 
   return (
@@ -64,7 +64,7 @@ export default async function DashboardPage() {
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {stats.map(({ label, value }) => (
-            <section key={label} className="border bg-card p-5">
+            <section key={label} className="rounded-md border bg-card p-5 shadow-sm">
               <p className="text-sm text-muted-foreground">{label}</p>
               <p className="mt-3 text-2xl font-semibold">{value}</p>
             </section>
@@ -81,7 +81,7 @@ export default async function DashboardPage() {
               {d.viewAll} <ArrowRight className="size-3.5" />
             </Link>
           </div>
-          <div className="border bg-background">
+          <div className="overflow-hidden rounded-md border bg-card shadow-sm">
             {recent.length === 0 ? (
               <p className="px-5 py-8 text-center text-sm text-muted-foreground">
                 {d.noTickets}{" "}
@@ -99,7 +99,7 @@ export default async function DashboardPage() {
                 </thead>
                 <tbody>
                   {recent.map((ticket) => (
-                    <tr key={ticket.id} className="border-b last:border-b-0 hover:bg-muted/40">
+                    <tr key={ticket.id} className="border-b last:border-b-0 hover:bg-accent-soft/50">
                       <td className="px-5 py-3">
                         <Link href={`/dashboard/tickets/${ticket.id}`} className="hover:underline">
                           {ticket.subject}
@@ -107,12 +107,12 @@ export default async function DashboardPage() {
                       </td>
                       <td className="px-5 py-3 text-muted-foreground">{ticket.requesterName}</td>
                       <td className="px-5 py-3">
-                        <span className={`inline-flex items-center px-2 py-0.5 text-xs font-medium ${priorityStyles[ticket.priority] ?? "bg-gray-100 text-gray-600"}`}>
+                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${priorityStyles[ticket.priority] ?? "bg-muted text-muted-foreground"}`}>
                           {t.tickets.priorityLabels[ticket.priority as keyof typeof t.tickets.priorityLabels] ?? ticket.priority}
                         </span>
                       </td>
                       <td className="px-5 py-3">
-                        <span className={`inline-flex items-center px-2 py-0.5 text-xs font-medium ${statusStyles[ticket.status] ?? "bg-gray-100 text-gray-600"}`}>
+                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusStyles[ticket.status] ?? "bg-muted text-muted-foreground"}`}>
                           {t.tickets.statusLabels[ticket.status as keyof typeof t.tickets.statusLabels] ?? ticket.status}
                         </span>
                       </td>

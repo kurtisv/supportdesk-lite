@@ -34,25 +34,26 @@ export default async function SupportPage({
 
   return (
     <MarketingPageShell>
-      <main className="mx-auto max-w-2xl px-6 py-16">
-        <p className="mb-2 text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">
+      <main className="border-t bg-[linear-gradient(135deg,#fbfaf7_0%,#f7efe2_58%,#fbfaf7_100%)]">
+        <div className="mx-auto max-w-2xl px-6 py-16">
+        <p className="mb-2 text-sm font-medium uppercase tracking-[0.18em] text-primary">
           {s.label}
         </p>
         <h1 className="text-3xl font-semibold">{s.title}</h1>
         <p className="mt-3 text-muted-foreground">{s.subtitle}</p>
 
         {params.success ? (
-          <div className="mt-6 border border-green-200 bg-green-50 p-4 text-sm text-green-800">
+          <div className="mt-6 rounded-md border border-success/25 bg-success-soft p-4 text-sm text-success">
             {s.successMsg}{" "}
             <Link href="/" className="underline">{s.backHome}</Link>
           </div>
         ) : params.error ? (
-          <div className="mt-6 border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+          <div className="mt-6 rounded-md border border-destructive/25 bg-destructive-soft p-4 text-sm text-destructive">
             {s.errorMsg}
           </div>
         ) : null}
 
-        <form action={createTicket} className="mt-8 grid gap-5">
+        <form action={createTicket} className="mt-8 grid gap-5 rounded-md border bg-card p-6 shadow-sm">
           <div className="grid gap-1.5">
             <Label htmlFor="requesterName">{s.nameLabel}</Label>
             <Input id="requesterName" name="requesterName" required placeholder={s.namePlaceholder} />
@@ -80,7 +81,7 @@ export default async function SupportPage({
                 id="category"
                 name="category"
                 defaultValue="OTHER"
-                className="flex h-10 w-full border bg-background px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                className="flex h-10 w-full rounded-md border border-border bg-card px-3 text-sm focus:border-accent focus:outline-none"
               >
                 {categories.map((c) => (
                   <option key={c.value} value={c.value}>{c.label}</option>
@@ -94,7 +95,7 @@ export default async function SupportPage({
                 id="priority"
                 name="priority"
                 defaultValue="MEDIUM"
-                className="flex h-10 w-full border bg-background px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                className="flex h-10 w-full rounded-md border border-border bg-card px-3 text-sm focus:border-accent focus:outline-none"
               >
                 {priorities.map((p) => (
                   <option key={p.value} value={p.value}>{p.label}</option>
@@ -103,10 +104,11 @@ export default async function SupportPage({
             </div>
           </div>
 
-          <Button type="submit" className="w-full sm:w-auto">
-            {s.submit}
-          </Button>
+        <Button type="submit" className="w-full sm:w-auto">
+          {s.submit}
+        </Button>
         </form>
+        </div>
       </main>
     </MarketingPageShell>
   );

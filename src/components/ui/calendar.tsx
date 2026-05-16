@@ -6,7 +6,7 @@ export function Calendar({ className, ...props }: React.InputHTMLAttributes<HTML
   return (
     <input
       type="date"
-      className={cn("h-10 border border-border bg-background px-3 text-sm outline-none focus:border-foreground", className)}
+      className={cn("h-10 rounded-md border border-border bg-card px-3 text-sm outline-none focus:border-accent", className)}
       {...props}
     />
   );
