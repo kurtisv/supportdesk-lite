@@ -244,6 +244,27 @@ export async function updateTicketStatus(formData: FormData) {
       actionLabel: "Voir l'activite",
       actionUrl: "/dashboard",
     });
+
+    await sendEcosystemHandoff(process.env.API_METER_INGEST_URL ?? "https://api-meter.vercel.app/api/ecosystem/ingest", {
+      flowId: ticket.flowId,
+      sourceApp: "supportdesk-lite",
+      eventType: "ticket.resolved",
+      entityType: "ticket",
+      entityId: ticket.id,
+      customerName: ticket.requesterName,
+      customerEmail: ticket.requesterEmail,
+      title: "Ticket resolu dans SupportDesk Lite",
+      description: `${ticket.requesterName} a un ticket resolu: ${ticket.subject}.`,
+      payload: {
+        category: ticket.category,
+        priority: ticket.priority,
+        status: ticket.status,
+        linkedEntityType: ticket.linkedEntityType,
+        linkedEntityId: ticket.linkedEntityId,
+        flowId: ticket.flowId,
+      },
+      priority: "NORMAL",
+    });
   }
 
   await sendTransactionalEmail({
@@ -262,6 +283,21 @@ export async function updateTicketStatus(formData: FormData) {
   revalidatePath(`/dashboard/tickets/${parsed.data.ticketId}`);
   revalidatePath("/dashboard/tickets");
   revalidatePath("/dashboard");
+}
+
+async function sendEcosystemHandoff(url: string, body: Record<string, unknown>) {
+  if (!body.flowId) return;
+
+  try {
+    await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
+  } catch (error) {
+    console.error("Ecosystem handoff failed", error);
+  }
 }
 
 const updatePrioritySchema = z.object({
