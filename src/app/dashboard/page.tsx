@@ -4,9 +4,10 @@ import { ArrowRight } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { getT } from "@/lib/i18n";
 import { EcosystemNotificationPanel } from "@/components/ecosystem/notification-panel";
+import { getIncomingEcosystemEvents } from "@/lib/ecosystem";
 
 export default async function DashboardPage() {
-  const [t, [
+  const [t, ecosystemTickets, [
     { count: total },
     { count: open },
     { count: inProgress },
@@ -14,6 +15,7 @@ export default async function DashboardPage() {
     { count: urgent },
   ]] = await Promise.all([
     getT(),
+    getIncomingEcosystemEvents("supportdesk-lite", undefined, 8),
     Promise.all([
       supabase.from("Ticket").select("*", { count: "exact", head: true }),
       supabase.from("Ticket").select("*", { count: "exact", head: true }).eq("status", "OPEN"),
@@ -75,6 +77,40 @@ export default async function DashboardPage() {
         <div className="mt-10">
           <EcosystemNotificationPanel appKey="supportdesk-lite" />
         </div>
+
+        <section className="mt-10 rounded-md border bg-card shadow-sm">
+          <div className="border-b p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              Nouveautes de l'ecosysteme
+            </p>
+            <h2 className="mt-2 font-semibold">Tickets recus de l'ecosysteme</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              ReserveFlow, CommerceKit, EventPass et ClientHub transmettent le contexte complet du client.
+            </p>
+          </div>
+          <div className="divide-y">
+            {ecosystemTickets.map((event) => (
+              <article key={event.id} className="grid gap-3 p-5 md:grid-cols-[1fr_auto]">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="border bg-background px-2 py-1 text-xs font-semibold">{event.sourceApp}</span>
+                    <span className="font-mono text-xs text-muted-foreground">{event.flowId}</span>
+                  </div>
+                  <h3 className="mt-3 font-semibold">{event.customerName ?? "Client ecosysteme"}</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">{event.description ?? event.title}</p>
+                </div>
+                <span className="self-center rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold">
+                  {event.eventType}
+                </span>
+              </article>
+            ))}
+            {ecosystemTickets.length === 0 ? (
+              <p className="p-5 text-sm text-muted-foreground">
+                Aucun ticket entrant pour l'instant. Une commande, un evenement ou un projet alimentera cette file.
+              </p>
+            ) : null}
+          </div>
+        </section>
 
         <div className="mt-10">
           <div className="mb-4 flex items-center justify-between">

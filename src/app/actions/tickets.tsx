@@ -117,6 +117,32 @@ export async function updateTicketStatus(formData: FormData) {
 
   if (error || !ticket) return;
 
+  if (parsed.data.status === TicketStatus.RESOLVED) {
+    await publishEcosystemEvent({
+      flowId: ticket.flowId ?? undefined,
+      sourceApp: "supportdesk-lite",
+      targetApps: ["clienthub", "api-meter"],
+      eventType: "ticket.resolved",
+      entityType: "ticket",
+      entityId: ticket.id,
+      customerName: ticket.requesterName,
+      customerEmail: ticket.requesterEmail,
+      title: "Ticket resolu dans SupportDesk Lite",
+      description: `${ticket.requesterName} a un ticket resolu: ${ticket.subject}.`,
+      payload: {
+        category: ticket.category,
+        priority: ticket.priority,
+        status: ticket.status,
+        linkedEntityType: ticket.linkedEntityType,
+        linkedEntityId: ticket.linkedEntityId,
+        flowId: ticket.flowId,
+      },
+      priority: "NORMAL",
+      actionLabel: "Voir l'activite",
+      actionUrl: "/dashboard",
+    });
+  }
+
   await sendTransactionalEmail({
     to: ticket.requesterEmail,
     subject: `Your ticket status has been updated`,

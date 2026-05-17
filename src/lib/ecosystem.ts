@@ -84,6 +84,22 @@ export async function getIncomingEcosystemNotifications(appKey: string, take = 6
   return data ?? [];
 }
 
+export async function getIncomingEcosystemEvents(appKey: string, eventType?: string, take = 10) {
+  let query = supabase
+    .from("EcosystemEvent")
+    .select("id, flowId, sourceApp, targetApp, eventType, entityType, entityId, customerName, customerEmail, title, description, payload, status, createdAt")
+    .eq("targetApp", appKey)
+    .order("createdAt", { ascending: false })
+    .limit(take);
+
+  if (eventType) {
+    query = query.eq("eventType", eventType);
+  }
+
+  const { data } = await query;
+  return data ?? [];
+}
+
 export async function getRecentEcosystemEvents(take = 20) {
   const { data } = await supabase
     .from("EcosystemEvent")
