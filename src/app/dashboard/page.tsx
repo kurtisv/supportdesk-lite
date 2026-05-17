@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 
 import { supabase } from "@/lib/supabase";
 import { getT } from "@/lib/i18n";
+import { EcosystemNotificationPanel } from "@/components/ecosystem/notification-panel";
 
 export default async function DashboardPage() {
   const [t, [
@@ -69,6 +70,10 @@ export default async function DashboardPage() {
               <p className="mt-3 text-2xl font-semibold">{value}</p>
             </section>
           ))}
+        </div>
+
+        <div className="mt-10">
+          <EcosystemNotificationPanel appKey="supportdesk-lite" />
         </div>
 
         <div className="mt-10">

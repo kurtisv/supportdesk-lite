@@ -9,6 +9,7 @@ import { TicketCreatedEmail } from "@/emails/ticket-created";
 import { TicketStatusUpdatedEmail } from "@/emails/ticket-status-updated";
 import { TicketCategory, TicketPriority, TicketStatus } from "@/lib/ticket-types";
 import { requireDashboardAccess } from "@/lib/dashboard-auth";
+import { publishEcosystemEvent } from "@/lib/ecosystem";
 import { supabase } from "@/lib/supabase";
 import { sendTransactionalEmail } from "@/lib/email/resend";
 
@@ -66,6 +67,26 @@ export async function createTicket(formData: FormData) {
         subject={ticket.subject}
       />
     ),
+  });
+
+  await publishEcosystemEvent({
+    sourceApp: "supportdesk-lite",
+    targetApps: ["clienthub", "api-meter"],
+    eventType: "ticket.created",
+    entityType: "ticket",
+    entityId: ticket.id,
+    customerName: ticket.requesterName,
+    customerEmail: ticket.requesterEmail,
+    title: "Ticket ouvert dans SupportDesk Lite",
+    description: `${ticket.requesterName} a ouvert le ticket: ${ticket.subject}.`,
+    payload: {
+      category: ticket.category,
+      priority: ticket.priority,
+      status: ticket.status,
+    },
+    priority: ticket.priority === TicketPriority.URGENT ? "URGENT" : ticket.priority === TicketPriority.HIGH ? "HIGH" : "NORMAL",
+    actionLabel: "Voir le ticket",
+    actionUrl: `/dashboard/tickets/${ticket.id}`,
   });
 
   revalidatePath("/dashboard/tickets");
