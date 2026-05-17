@@ -265,6 +265,7 @@ model EcosystemNotification {
   id          String   @id @default(cuid())
   appKey      String
   eventId     String
+  flowId      String?
   title       String
   message     String
   priority    String   @default("NORMAL")
@@ -275,6 +276,7 @@ model EcosystemNotification {
 
   @@index([appKey])
   @@index([eventId])
+  @@index([flowId])
   @@index([isRead])
   @@index([createdAt])
 }

@@ -17,7 +17,7 @@ const stack = [
 ];
 
 const queue = [
-  { client: "Lead Luma entrant", company: "Northline Studio", origin: "CommerceKit CK-2026-0001", issue: "Launch kit access and final QA handoff", sla: "1h 12m", priority: "High" },
+  { client: "Camille Moreau", company: "Studio Moreau", origin: "CommerceKit CK-2026-0001", issue: "Launch kit access and final QA handoff", sla: "1h 12m", priority: "High" },
   { client: "Elliot Moore", company: "Atelier Boutique", origin: "EventPass Design Ops Night", issue: "Workshop material pickup confirmation", sla: "3h 40m", priority: "Medium" },
   { client: "Nadia Fortin", company: "Riverside Condo", origin: "ReserveFlow review", issue: "Post-consultation finish notes", sla: "5h 10m", priority: "Low" },
 ];

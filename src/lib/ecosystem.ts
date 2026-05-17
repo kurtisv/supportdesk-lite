@@ -60,6 +60,7 @@ export async function publishEcosystemEvent(input: PublishEcosystemEventInput) {
         id: crypto.randomUUID(),
         appKey,
         eventId: event.id,
+        flowId,
         title: input.notificationTitle ?? input.title,
         message: input.notificationMessage ?? input.description ?? input.title,
         priority: input.priority ?? "NORMAL",
@@ -76,7 +77,7 @@ export async function publishEcosystemEvent(input: PublishEcosystemEventInput) {
 export async function getIncomingEcosystemNotifications(appKey: string, take = 6) {
   const { data } = await supabase
     .from("EcosystemNotification")
-    .select("id, appKey, eventId, title, message, priority, isRead, actionLabel, actionUrl, createdAt")
+    .select("id, appKey, eventId, flowId, title, message, priority, isRead, actionLabel, actionUrl, createdAt")
     .eq("appKey", appKey)
     .order("createdAt", { ascending: false })
     .limit(take);

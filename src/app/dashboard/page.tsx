@@ -7,6 +7,8 @@ import { EcosystemNotificationPanel } from "@/components/ecosystem/notification-
 import { createTicketFromEcosystemEvent } from "@/app/actions/tickets";
 import { getIncomingEcosystemEvents } from "@/lib/ecosystem";
 
+const timeline = ["Luma Studio", "QuotePilot", "ReserveFlow", "ClientHub", "CommerceKit", "EventPass", "SupportDesk Lite", "API Meter"];
+
 export default async function DashboardPage() {
   const [t, ecosystemTickets, [
     { count: total },
@@ -63,6 +65,9 @@ export default async function DashboardPage() {
           <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">
             {d.overviewLabel}
           </p>
+          <p className="mt-2 inline-flex rounded-md border bg-accent-soft px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+            KV Portfolio Ecosystem - Demo Mode
+          </p>
           <h1 className="mt-3 text-3xl font-semibold">{d.overview}</h1>
         </div>
 
@@ -79,12 +84,23 @@ export default async function DashboardPage() {
           <EcosystemNotificationPanel appKey="supportdesk-lite" />
         </div>
 
+        <section className="mt-10 rounded-md border bg-card p-5 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Timeline du parcours</p>
+          <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
+            {timeline.map((item, index) => (
+              <span key={item} className={index === 6 ? "rounded-md bg-primary px-3 py-2 text-primary-foreground" : "rounded-md border bg-background px-3 py-2"}>
+                {String(index + 1).padStart(2, "0")} {item}
+              </span>
+            ))}
+          </div>
+        </section>
+
         <section className="mt-10 rounded-md border bg-card shadow-sm">
           <div className="border-b p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-              Nouveautes de l'ecosysteme
+              Nouveautes de l&apos;ecosysteme
             </p>
-            <h2 className="mt-2 font-semibold">Tickets recus de l'ecosysteme</h2>
+            <h2 className="mt-2 font-semibold">Tickets recus de l&apos;ecosysteme</h2>
             <p className="mt-1 text-sm text-muted-foreground">
               ReserveFlow, CommerceKit, EventPass et ClientHub transmettent le contexte complet du client.
             </p>
@@ -115,7 +131,7 @@ export default async function DashboardPage() {
             ))}
             {ecosystemTickets.length === 0 ? (
               <p className="p-5 text-sm text-muted-foreground">
-                Aucun ticket entrant pour l'instant. Une commande, un evenement ou un projet alimentera cette file.
+                Aucun ticket entrant pour l&apos;instant. Une commande, un evenement ou un projet alimentera cette file.
               </p>
             ) : null}
           </div>
