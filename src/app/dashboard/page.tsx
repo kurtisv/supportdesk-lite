@@ -4,10 +4,17 @@ import { ArrowRight } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { getT } from "@/lib/i18n";
 import { EcosystemNotificationPanel } from "@/components/ecosystem/notification-panel";
-import { createTicketFromEcosystemEvent } from "@/app/actions/tickets";
+import { createTicketFromEcosystemEvent, updateTicketStatus } from "@/app/actions/tickets";
 import { getIncomingEcosystemEvents } from "@/lib/ecosystem";
+import { TicketStatus } from "@/lib/ticket-types";
 
 const timeline = ["Luma Studio", "QuotePilot", "ReserveFlow", "ClientHub", "CommerceKit", "EventPass", "SupportDesk Lite", "API Meter"];
+
+const triageLanes = [
+  ["New", "Tickets entrants a qualifier", "OPEN"],
+  ["SLA watch", "Priorite et delai de premiere reponse", "HIGH"],
+  ["Resolved", "Signal ticket.resolved vers API Meter", "RESOLVED"],
+];
 
 export default async function DashboardPage() {
   const [t, ecosystemTickets, [
@@ -59,16 +66,32 @@ export default async function DashboardPage() {
   };
 
   return (
-    <main className="px-6 py-10 text-foreground">
+    <main className="bg-[linear-gradient(180deg,#f8fbff_0%,#eef6ff_48%,#ffffff_100%)] px-6 py-10 text-foreground">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-8">
-          <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">
-            {d.overviewLabel}
-          </p>
-          <p className="mt-2 inline-flex rounded-md border bg-accent-soft px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+        <div className="mb-8 grid gap-6 lg:grid-cols-[1fr_0.85fr] lg:items-end">
+          <div>
+          <p className="inline-flex rounded-md border bg-white px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-primary">
             KV Portfolio Ecosystem - Demo Mode
           </p>
-          <h1 className="mt-3 text-3xl font-semibold">{d.overview}</h1>
+            <p className="mt-4 text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">
+              {d.overviewLabel} / support operations
+            </p>
+            <h1 className="mt-3 text-4xl font-semibold tracking-normal">Support triage desk</h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
+              SupportDesk Lite demontre une interface SaaS de tickets: source du probleme,
+              priorite, SLA, contexte client, statut et resolution.
+            </p>
+          </div>
+          <section className="rounded-md border bg-card p-5 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              Ce que tu peux tester ici
+            </p>
+            <div className="mt-3 grid gap-2 text-sm">
+              <p><span className="font-semibold">Recoit:</span> rendez-vous, commandes, evenements ou problemes client.</p>
+              <p><span className="font-semibold">Transmet:</span> ticket.created et ticket.resolved vers API Meter.</p>
+              <p><span className="font-semibold">Boilerplate:</span> Supabase, server actions, email-ready et statut workflow.</p>
+            </div>
+          </section>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -93,6 +116,23 @@ export default async function DashboardPage() {
               </span>
             ))}
           </div>
+        </section>
+
+        <section className="mt-10 grid gap-4 md:grid-cols-3">
+          {triageLanes.map(([title, detail, badge]) => (
+            <article key={title} className="rounded-md border bg-card p-5 shadow-sm">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="font-semibold">{title}</h2>
+                <span className="rounded-full border bg-background px-2.5 py-1 text-xs font-semibold text-muted-foreground">
+                  {badge}
+                </span>
+              </div>
+              <p className="mt-3 text-sm leading-6 text-muted-foreground">{detail}</p>
+              <p className="mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+                SLA cible: 1h premiere reponse
+              </p>
+            </article>
+          ))}
         </section>
 
         <section className="mt-10 rounded-md border bg-card shadow-sm">
@@ -130,9 +170,12 @@ export default async function DashboardPage() {
               </article>
             ))}
             {ecosystemTickets.length === 0 ? (
-              <p className="p-5 text-sm text-muted-foreground">
-                Aucun ticket entrant pour l&apos;instant. Une commande, un evenement ou un projet alimentera cette file.
-              </p>
+              <div className="p-5">
+                <p className="rounded-md border bg-background p-4 text-sm text-muted-foreground">
+                  Aucun ticket entrant pour l&apos;instant. Une commande CommerceKit, un check-in EventPass
+                  ou un projet ClientHub fera apparaitre ici la source, la priorite, le contexte et le flowId.
+                </p>
+              </div>
             ) : null}
           </div>
         </section>
@@ -161,6 +204,7 @@ export default async function DashboardPage() {
                     <th className="px-5 py-3 text-left font-medium">{d.colRequester}</th>
                     <th className="px-5 py-3 text-left font-medium">{d.colPriority}</th>
                     <th className="px-5 py-3 text-left font-medium">{d.colStatus}</th>
+                    <th className="px-5 py-3 text-right font-medium">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -181,6 +225,19 @@ export default async function DashboardPage() {
                         <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusStyles[ticket.status] ?? "bg-muted text-muted-foreground"}`}>
                           {t.tickets.statusLabels[ticket.status as keyof typeof t.tickets.statusLabels] ?? ticket.status}
                         </span>
+                      </td>
+                      <td className="px-5 py-3 text-right">
+                        {ticket.status !== TicketStatus.RESOLVED ? (
+                          <form action={updateTicketStatus}>
+                            <input type="hidden" name="ticketId" value={ticket.id} />
+                            <input type="hidden" name="status" value={TicketStatus.RESOLVED} />
+                            <button className="rounded-md border bg-background px-3 py-1.5 text-xs font-semibold hover:bg-accent-soft">
+                              Resoudre
+                            </button>
+                          </form>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">Complete</span>
+                        )}
                       </td>
                     </tr>
                   ))}
