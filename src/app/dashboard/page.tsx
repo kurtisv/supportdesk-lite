@@ -113,7 +113,7 @@ export default async function DashboardPage() {
                     <span className="border bg-background px-2 py-1 text-xs font-semibold">{event.sourceApp}</span>
                     <span className="font-mono text-xs text-muted-foreground">{event.flowId}</span>
                   </div>
-                  <h3 className="mt-3 font-semibold">{event.customerName ?? "Client ecosysteme"}</h3>
+                  <h3 className="mt-3 font-semibold">{event.customerName ?? "Nom recu du formulaire"}</h3>
                   <p className="mt-1 text-sm text-muted-foreground">{event.description ?? event.title}</p>
                 </div>
                 <div className="flex flex-col items-start gap-3 self-center md:items-end">

@@ -116,8 +116,9 @@ export async function createTicketFromEcosystemEvent(formData: FormData) {
   if (eventError || !event) return;
 
   const payload = payloadOf(event.payload);
-  const requesterName = event.customerName || text(payload.customerName) || "Client ecosysteme";
-  const requesterEmail = event.customerEmail || text(payload.customerEmail) || "client@ecosystem.local";
+  const requesterName = event.customerName || text(payload.customerName) || text(payload.name) || "Nom recu du formulaire";
+  const requesterEmail = event.customerEmail || text(payload.customerEmail) || text(payload.email);
+  if (!requesterEmail) return;
   const subject = `Suivi ${event.sourceApp}: ${event.title}`.slice(0, 200);
   const linkedEntityType = event.entityType ?? event.eventType;
   const linkedEntityId = event.entityId ?? event.id;
