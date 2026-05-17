@@ -85,12 +85,25 @@ export async function getIncomingEcosystemNotifications(appKey: string, take = 6
 }
 
 export async function getIncomingEcosystemEvents(appKey: string, eventType?: string, take = 10) {
+  const { data: notifications } = await supabase
+    .from("EcosystemNotification")
+    .select("eventId")
+    .eq("appKey", appKey)
+    .order("createdAt", { ascending: false })
+    .limit(take);
+
+  const eventIds = (notifications ?? []).map((item) => item.eventId).filter(Boolean);
   let query = supabase
     .from("EcosystemEvent")
     .select("id, flowId, sourceApp, targetApp, eventType, entityType, entityId, customerName, customerEmail, title, description, payload, status, createdAt")
-    .eq("targetApp", appKey)
     .order("createdAt", { ascending: false })
     .limit(take);
+
+  if (eventIds.length > 0) {
+    query = query.or(`targetApp.eq.${appKey},id.in.(${eventIds.join(",")})`);
+  } else {
+    query = query.eq("targetApp", appKey);
+  }
 
   if (eventType) {
     query = query.eq("eventType", eventType);
@@ -98,6 +111,33 @@ export async function getIncomingEcosystemEvents(appKey: string, eventType?: str
 
   const { data } = await query;
   return data ?? [];
+}
+
+export async function linkEcosystemEntities(input: {
+  flowId: string;
+  fromApp: string;
+  fromEntityType: string;
+  fromEntityId: string;
+  toApp: string;
+  toEntityType: string;
+  toEntityId?: string;
+}) {
+  const { data } = await supabase
+    .from("EcosystemEntityLink")
+    .insert({
+      id: crypto.randomUUID(),
+      flowId: input.flowId,
+      fromApp: input.fromApp,
+      fromEntityType: input.fromEntityType,
+      fromEntityId: input.fromEntityId,
+      toApp: input.toApp,
+      toEntityType: input.toEntityType,
+      toEntityId: input.toEntityId ?? null,
+    })
+    .select()
+    .single();
+
+  return data ?? null;
 }
 
 export async function getRecentEcosystemEvents(take = 20) {

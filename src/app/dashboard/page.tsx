@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { getT } from "@/lib/i18n";
 import { EcosystemNotificationPanel } from "@/components/ecosystem/notification-panel";
+import { createTicketFromEcosystemEvent } from "@/app/actions/tickets";
 import { getIncomingEcosystemEvents } from "@/lib/ecosystem";
 
 export default async function DashboardPage() {
@@ -90,7 +91,7 @@ export default async function DashboardPage() {
           </div>
           <div className="divide-y">
             {ecosystemTickets.map((event) => (
-              <article key={event.id} className="grid gap-3 p-5 md:grid-cols-[1fr_auto]">
+              <article key={event.id} className="grid gap-4 p-5 md:grid-cols-[1fr_auto]">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="border bg-background px-2 py-1 text-xs font-semibold">{event.sourceApp}</span>
@@ -99,9 +100,17 @@ export default async function DashboardPage() {
                   <h3 className="mt-3 font-semibold">{event.customerName ?? "Client ecosysteme"}</h3>
                   <p className="mt-1 text-sm text-muted-foreground">{event.description ?? event.title}</p>
                 </div>
-                <span className="self-center rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold">
-                  {event.eventType}
-                </span>
+                <div className="flex flex-col items-start gap-3 self-center md:items-end">
+                  <span className="rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold">
+                    {event.eventType}
+                  </span>
+                  <form action={createTicketFromEcosystemEvent}>
+                    <input type="hidden" name="eventId" value={event.id} />
+                    <button className="rounded-md border bg-background px-3 py-2 text-xs font-semibold hover:bg-accent-soft">
+                      Creer le ticket lie
+                    </button>
+                  </form>
+                </div>
               </article>
             ))}
             {ecosystemTickets.length === 0 ? (

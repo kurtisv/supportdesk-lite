@@ -9,7 +9,7 @@ import { TicketCreatedEmail } from "@/emails/ticket-created";
 import { TicketStatusUpdatedEmail } from "@/emails/ticket-status-updated";
 import { TicketCategory, TicketPriority, TicketStatus } from "@/lib/ticket-types";
 import { requireDashboardAccess } from "@/lib/dashboard-auth";
-import { publishEcosystemEvent } from "@/lib/ecosystem";
+import { linkEcosystemEntities, publishEcosystemEvent } from "@/lib/ecosystem";
 import { supabase } from "@/lib/supabase";
 import { sendTransactionalEmail } from "@/lib/email/resend";
 
@@ -21,6 +21,14 @@ const createTicketSchema = z.object({
   category: z.nativeEnum(TicketCategory),
   priority: z.nativeEnum(TicketPriority),
 });
+
+function payloadOf(value: unknown): Record<string, unknown> {
+  return typeof value === "object" && value !== null ? (value as Record<string, unknown>) : {};
+}
+
+function text(value: unknown) {
+  return typeof value === "string" ? value.trim() : "";
+}
 
 export async function createTicket(formData: FormData) {
   const parsed = createTicketSchema.safeParse({
@@ -91,6 +99,100 @@ export async function createTicket(formData: FormData) {
 
   revalidatePath("/dashboard/tickets");
   redirect("/support?success=1");
+}
+
+export async function createTicketFromEcosystemEvent(formData: FormData) {
+  await requireDashboardAccess();
+
+  const eventId = String(formData.get("eventId") ?? "").trim();
+  if (!eventId) return;
+
+  const { data: event, error: eventError } = await supabase
+    .from("EcosystemEvent")
+    .select("id, flowId, sourceApp, eventType, entityType, entityId, customerName, customerEmail, title, description, payload")
+    .eq("id", eventId)
+    .single();
+
+  if (eventError || !event) return;
+
+  const payload = payloadOf(event.payload);
+  const requesterName = event.customerName || text(payload.customerName) || "Client ecosysteme";
+  const requesterEmail = event.customerEmail || text(payload.customerEmail) || "client@ecosystem.local";
+  const subject = `Suivi ${event.sourceApp}: ${event.title}`.slice(0, 200);
+  const linkedEntityType = event.entityType ?? event.eventType;
+  const linkedEntityId = event.entityId ?? event.id;
+  const now = new Date().toISOString();
+
+  const { data: ticket, error } = await supabase
+    .from("Ticket")
+    .insert({
+      id: crypto.randomUUID(),
+      requesterName,
+      requesterEmail,
+      subject,
+      description: [
+        event.description ?? event.title,
+        `Source: ${event.sourceApp} / ${event.eventType}`,
+        `Flow: ${event.flowId}`,
+      ].join("\n"),
+      category: TicketCategory.OTHER,
+      priority: event.eventType.includes("ticket") ? TicketPriority.HIGH : TicketPriority.MEDIUM,
+      status: TicketStatus.OPEN,
+      flowId: event.flowId,
+      sourceApp: event.sourceApp,
+      sourceEventId: event.id,
+      linkedEntityType,
+      linkedEntityId,
+      contextJson: {
+        sourceEvent: event,
+        payload,
+      },
+      updatedAt: now,
+    })
+    .select()
+    .single();
+
+  if (error || !ticket) return;
+
+  await linkEcosystemEntities({
+    flowId: event.flowId,
+    fromApp: event.sourceApp,
+    fromEntityType: event.entityType,
+    fromEntityId: event.entityId ?? event.id,
+    toApp: "supportdesk-lite",
+    toEntityType: "ticket",
+    toEntityId: ticket.id,
+  });
+
+  await publishEcosystemEvent({
+    flowId: event.flowId,
+    sourceApp: "supportdesk-lite",
+    targetApps: ["clienthub", "api-meter"],
+    eventType: "ticket.created",
+    entityType: "ticket",
+    entityId: ticket.id,
+    customerName: ticket.requesterName,
+    customerEmail: ticket.requesterEmail,
+    title: "Ticket SupportDesk cree depuis le parcours reel",
+    description: `${ticket.requesterName} a un ticket lie a ${event.sourceApp}: ${event.title}.`,
+    payload: {
+      category: ticket.category,
+      priority: ticket.priority,
+      status: ticket.status,
+      linkedEntityType,
+      linkedEntityId,
+      sourceApp: event.sourceApp,
+      sourceEventId: event.id,
+      flowId: event.flowId,
+    },
+    priority: ticket.priority === TicketPriority.URGENT ? "URGENT" : ticket.priority === TicketPriority.HIGH ? "HIGH" : "NORMAL",
+    actionLabel: "Voir le ticket",
+    actionUrl: `/dashboard/tickets/${ticket.id}`,
+  });
+
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/tickets");
+  redirect(`/dashboard/tickets/${ticket.id}`);
 }
 
 const updateStatusSchema = z.object({
