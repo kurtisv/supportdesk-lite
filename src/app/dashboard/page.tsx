@@ -11,13 +11,25 @@ import { TicketStatus } from "@/lib/ticket-types";
 const timeline = ["Luma Studio", "QuotePilot", "ReserveFlow", "ClientHub", "CommerceKit", "EventPass", "SupportDesk Lite", "API Meter"];
 
 const triageLanes = [
-  ["New", "Tickets entrants a qualifier", "OPEN"],
-  ["SLA watch", "Priorite et delai de premiere reponse", "HIGH"],
-  ["Resolved", "Signal ticket.resolved vers API Meter", "RESOLVED"],
+  {
+    badge: "OPEN",
+    fr: ["Nouveaux", "Tickets entrants a qualifier"],
+    en: ["New", "Incoming tickets to triage"],
+  },
+  {
+    badge: "HIGH",
+    fr: ["Surveillance SLA", "Priorite et delai de premiere reponse"],
+    en: ["SLA watch", "Priority and first-response deadline"],
+  },
+  {
+    badge: "RESOLVED",
+    fr: ["Resolus", "Signal ticket.resolved vers API Meter"],
+    en: ["Resolved", "ticket.resolved signal to API Meter"],
+  },
 ];
 
 export default async function DashboardPage() {
-  const [t, ecosystemTickets, [
+  const [t, ecosystemEvents, [
     { count: total },
     { count: open },
     { count: inProgress },
@@ -25,7 +37,7 @@ export default async function DashboardPage() {
     { count: urgent },
   ]] = await Promise.all([
     getT(),
-    getIncomingEcosystemEvents("supportdesk-lite", undefined, 8),
+    getIncomingEcosystemEvents("supportdesk-lite", undefined, 12),
     Promise.all([
       supabase.from("Ticket").select("*", { count: "exact", head: true }),
       supabase.from("Ticket").select("*", { count: "exact", head: true }).eq("status", "OPEN"),
@@ -36,6 +48,65 @@ export default async function DashboardPage() {
   ]);
 
   const d = t.dashboard;
+  const supportedEventTypes = new Set([
+    "support.context.created",
+    "order.created",
+    "event.ticket.created",
+    "event.checkin.completed",
+  ]);
+  const ecosystemTickets = ecosystemEvents.filter((event) => supportedEventTypes.has(event.eventType));
+  const locale = t.lang;
+  const copy = locale === "fr"
+    ? {
+        productLabel: `${d.overviewLabel} / operations support`,
+        title: "Bureau de triage support",
+        intro:
+          "SupportDesk Lite demontre une interface SaaS de tickets: source du probleme, priorite, SLA, contexte client, statut et resolution.",
+        testTitle: "Ce que tu peux tester ici",
+        receives: "Recoit",
+        receivesText: "rendez-vous, commandes, evenements ou problemes client.",
+        sends: "Transmet",
+        sendsText: "ticket.created et ticket.resolved vers API Meter.",
+        boilerplate: "Boilerplate",
+        boilerplateText: "Supabase, server actions, email-ready et statut workflow.",
+        timeline: "Timeline du parcours",
+        sla: "SLA cible: 1h premiere reponse",
+        news: "Nouveautes de l'ecosysteme",
+        ticketsTitle: "Tickets recus de l'ecosysteme",
+        ticketsIntro: "ReserveFlow, CommerceKit, EventPass et ClientHub transmettent le contexte complet du client.",
+        receivedName: "Nom recu du formulaire",
+        createTicket: "Creer le ticket lie",
+        empty:
+          "Aucun element recu pour l'instant. Creez d'abord un rendez-vous dans ReserveFlow, puis laissez ClientHub, CommerceKit ou EventPass transmettre le contexte support.",
+        action: "Action",
+        resolve: "Resoudre",
+        complete: "Complete",
+      }
+    : {
+        productLabel: `${d.overviewLabel} / support operations`,
+        title: "Support triage desk",
+        intro:
+          "SupportDesk Lite demonstrates a SaaS ticket interface: issue source, priority, SLA, customer context, status, and resolution.",
+        testTitle: "What you can test here",
+        receives: "Receives",
+        receivesText: "bookings, orders, events, or customer issues.",
+        sends: "Sends",
+        sendsText: "ticket.created and ticket.resolved to API Meter.",
+        boilerplate: "Boilerplate",
+        boilerplateText: "Supabase, server actions, email-ready flow, and status workflow.",
+        timeline: "Journey timeline",
+        sla: "Target SLA: 1h first response",
+        news: "Ecosystem updates",
+        ticketsTitle: "Tickets received from the ecosystem",
+        ticketsIntro: "ReserveFlow, CommerceKit, EventPass, and ClientHub send the complete customer context.",
+        receivedName: "Name received from the form",
+        createTicket: "Create linked ticket",
+        empty:
+          "No item received yet. Create a ReserveFlow meeting first, then let ClientHub, CommerceKit, or EventPass send support context.",
+        action: "Action",
+        resolve: "Resolve",
+        complete: "Complete",
+      };
 
   const { data: recentRaw } = await supabase
     .from("Ticket")
@@ -74,22 +145,21 @@ export default async function DashboardPage() {
             KV Portfolio Ecosystem - Demo Mode
           </p>
             <p className="mt-4 text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">
-              {d.overviewLabel} / support operations
+              {copy.productLabel}
             </p>
-            <h1 className="mt-3 text-4xl font-semibold tracking-normal">Support triage desk</h1>
+            <h1 className="mt-3 text-4xl font-semibold tracking-normal">{copy.title}</h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
-              SupportDesk Lite demontre une interface SaaS de tickets: source du probleme,
-              priorite, SLA, contexte client, statut et resolution.
+              {copy.intro}
             </p>
           </div>
           <section className="rounded-md border bg-card p-5 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-              Ce que tu peux tester ici
+              {copy.testTitle}
             </p>
             <div className="mt-3 grid gap-2 text-sm">
-              <p><span className="font-semibold">Recoit:</span> rendez-vous, commandes, evenements ou problemes client.</p>
-              <p><span className="font-semibold">Transmet:</span> ticket.created et ticket.resolved vers API Meter.</p>
-              <p><span className="font-semibold">Boilerplate:</span> Supabase, server actions, email-ready et statut workflow.</p>
+              <p><span className="font-semibold">{copy.receives}:</span> {copy.receivesText}</p>
+              <p><span className="font-semibold">{copy.sends}:</span> {copy.sendsText}</p>
+              <p><span className="font-semibold">{copy.boilerplate}:</span> {copy.boilerplateText}</p>
             </div>
           </section>
         </div>
@@ -108,7 +178,7 @@ export default async function DashboardPage() {
         </div>
 
         <section className="mt-10 rounded-md border bg-card p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Timeline du parcours</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{copy.timeline}</p>
           <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
             {timeline.map((item, index) => (
               <span key={item} className={index === 6 ? "rounded-md bg-primary px-3 py-2 text-primary-foreground" : "rounded-md border bg-background px-3 py-2"}>
@@ -119,42 +189,57 @@ export default async function DashboardPage() {
         </section>
 
         <section className="mt-10 grid gap-4 md:grid-cols-3">
-          {triageLanes.map(([title, detail, badge]) => (
-            <article key={title} className="rounded-md border bg-card p-5 shadow-sm">
+          {triageLanes.map((lane) => {
+            const [title, detail] = lane[locale];
+            return (
+            <article key={lane.badge} className="rounded-md border bg-card p-5 shadow-sm">
               <div className="flex items-center justify-between gap-3">
                 <h2 className="font-semibold">{title}</h2>
                 <span className="rounded-full border bg-background px-2.5 py-1 text-xs font-semibold text-muted-foreground">
-                  {badge}
+                  {lane.badge}
                 </span>
               </div>
               <p className="mt-3 text-sm leading-6 text-muted-foreground">{detail}</p>
               <p className="mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-primary">
-                SLA cible: 1h premiere reponse
+                {copy.sla}
               </p>
             </article>
-          ))}
+            );
+          })}
         </section>
 
         <section className="mt-10 rounded-md border bg-card shadow-sm">
           <div className="border-b p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-              Nouveautes de l&apos;ecosysteme
+              {copy.news}
             </p>
-            <h2 className="mt-2 font-semibold">Tickets recus de l&apos;ecosysteme</h2>
+            <h2 className="mt-2 font-semibold">{copy.ticketsTitle}</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              ReserveFlow, CommerceKit, EventPass et ClientHub transmettent le contexte complet du client.
+              {copy.ticketsIntro}
             </p>
           </div>
           <div className="divide-y">
-            {ecosystemTickets.map((event) => (
+            {ecosystemTickets.map((event) => {
+              const payload = typeof event.payload === "object" && event.payload !== null
+                ? event.payload as Record<string, unknown>
+                : {};
+              return (
               <article key={event.id} className="grid gap-4 p-5 md:grid-cols-[1fr_auto]">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="border bg-background px-2 py-1 text-xs font-semibold">{event.sourceApp}</span>
                     <span className="font-mono text-xs text-muted-foreground">{event.flowId}</span>
                   </div>
-                  <h3 className="mt-3 font-semibold">{event.customerName ?? "Nom recu du formulaire"}</h3>
+                  <h3 className="mt-3 font-semibold">{event.customerName ?? copy.receivedName}</h3>
                   <p className="mt-1 text-sm text-muted-foreground">{event.description ?? event.title}</p>
+                  <div className="mt-4 grid gap-2 text-xs text-muted-foreground sm:grid-cols-3">
+                    <span className="rounded-md border bg-background px-3 py-2">Projet: {String(payload.projectName ?? payload.projectType ?? "-")}</span>
+                    <span className="rounded-md border bg-background px-3 py-2">Commande: {String(payload.orderNumber ?? "-")}</span>
+                    <span className="rounded-md border bg-background px-3 py-2">Evenement: {String(payload.eventName ?? "-")}</span>
+                    <span className="rounded-md border bg-background px-3 py-2">Priorite: {event.eventType.includes("order") ? "HIGH" : "MEDIUM"}</span>
+                    <span className="rounded-md border bg-background px-3 py-2">Statut: NEW</span>
+                    <span className="rounded-md border bg-background px-3 py-2">Source: {event.sourceApp}</span>
+                  </div>
                 </div>
                 <div className="flex flex-col items-start gap-3 self-center md:items-end">
                   <span className="rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold">
@@ -163,17 +248,17 @@ export default async function DashboardPage() {
                   <form action={createTicketFromEcosystemEvent}>
                     <input type="hidden" name="eventId" value={event.id} />
                     <button className="rounded-md border bg-background px-3 py-2 text-xs font-semibold hover:bg-accent-soft">
-                      Creer le ticket lie
+                      {copy.createTicket}
                     </button>
                   </form>
                 </div>
               </article>
-            ))}
+              );
+            })}
             {ecosystemTickets.length === 0 ? (
               <div className="p-5">
                 <p className="rounded-md border bg-background p-4 text-sm text-muted-foreground">
-                  Aucun ticket entrant pour l&apos;instant. Une commande CommerceKit, un check-in EventPass
-                  ou un projet ClientHub fera apparaitre ici la source, la priorite, le contexte et le flowId.
+                  {copy.empty}
                 </p>
               </div>
             ) : null}
@@ -204,7 +289,7 @@ export default async function DashboardPage() {
                     <th className="px-5 py-3 text-left font-medium">{d.colRequester}</th>
                     <th className="px-5 py-3 text-left font-medium">{d.colPriority}</th>
                     <th className="px-5 py-3 text-left font-medium">{d.colStatus}</th>
-                    <th className="px-5 py-3 text-right font-medium">Action</th>
+                    <th className="px-5 py-3 text-right font-medium">{copy.action}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -232,11 +317,11 @@ export default async function DashboardPage() {
                             <input type="hidden" name="ticketId" value={ticket.id} />
                             <input type="hidden" name="status" value={TicketStatus.RESOLVED} />
                             <button className="rounded-md border bg-background px-3 py-1.5 text-xs font-semibold hover:bg-accent-soft">
-                              Resoudre
+                              {copy.resolve}
                             </button>
                           </form>
                         ) : (
-                          <span className="text-xs text-muted-foreground">Complete</span>
+                          <span className="text-xs text-muted-foreground">{copy.complete}</span>
                         )}
                       </td>
                     </tr>

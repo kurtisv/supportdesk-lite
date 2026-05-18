@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { getIncomingEcosystemNotifications } from "@/lib/ecosystem";
+import { getT } from "@/lib/i18n";
 
 type EcosystemNotificationPanelProps = {
   appKey: string;
@@ -17,9 +18,23 @@ const priorityStyles: Record<string, string> = {
 
 export async function EcosystemNotificationPanel({
   appKey,
-  title = "Nouveautes de l'ecosysteme",
-  emptyText = "Aucun evenement entrant pour le moment.",
+  title,
+  emptyText,
 }: EcosystemNotificationPanelProps) {
+  const locale = (await getT()).lang;
+  const fallback = locale === "fr"
+    ? {
+        title: "Nouveautes de l'ecosysteme",
+        emptyText: "Aucun evenement entrant pour le moment.",
+        newLabel: "nouveau",
+        continueLabel: "Continuer",
+      }
+    : {
+        title: "Ecosystem updates",
+        emptyText: "No incoming event yet.",
+        newLabel: "new",
+        continueLabel: "Continue",
+      };
   const notifications = await getIncomingEcosystemNotifications(appKey, 5);
 
   return (
@@ -29,16 +44,16 @@ export async function EcosystemNotificationPanel({
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
             KV Portfolio
           </p>
-          <h2 className="mt-2 text-xl font-semibold">{title}</h2>
+          <h2 className="mt-2 text-xl font-semibold">{title ?? fallback.title}</h2>
         </div>
         <span className="rounded-full border bg-background px-2.5 py-1 text-xs font-semibold text-muted-foreground">
-          {notifications.length} new
+          {notifications.length} {fallback.newLabel}
         </span>
       </div>
 
       <div className="mt-5 grid gap-3">
         {notifications.length === 0 ? (
-          <p className="rounded-md border bg-background p-4 text-sm text-muted-foreground">{emptyText}</p>
+          <p className="rounded-md border bg-background p-4 text-sm text-muted-foreground">{emptyText ?? fallback.emptyText}</p>
         ) : (
           notifications.map((notification) => (
             <article key={notification.id} className="rounded-md border bg-background p-4">
@@ -54,7 +69,7 @@ export async function EcosystemNotificationPanel({
                   href={notification.actionUrl}
                   className="mt-3 inline-flex text-sm font-semibold text-primary underline-offset-4 hover:underline"
                 >
-                  {notification.actionLabel ?? "Continuer"}
+                  {notification.actionLabel ?? fallback.continueLabel}
                 </Link>
               ) : null}
             </article>

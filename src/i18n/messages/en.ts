@@ -1,7 +1,7 @@
 const en = {
   app: {
-    name: "KV Web Starter",
-    tagline: "Premium modular boilerplate for marketing, booking, and SaaS/API projects.",
+    name: "SupportDesk Lite",
+    tagline: "Support desk for tickets, priorities, SLA, customer context, and resolution.",
   },
   nav: {
     services: "Services",

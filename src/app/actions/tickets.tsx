@@ -168,7 +168,7 @@ export async function createTicketFromEcosystemEvent(formData: FormData) {
   await publishEcosystemEvent({
     flowId: event.flowId,
     sourceApp: "supportdesk-lite",
-    targetApps: ["clienthub", "api-meter"],
+    targetApp: "api-meter",
     eventType: "ticket.created",
     entityType: "ticket",
     entityId: ticket.id,
@@ -182,6 +182,9 @@ export async function createTicketFromEcosystemEvent(formData: FormData) {
       status: ticket.status,
       linkedEntityType,
       linkedEntityId,
+      projectName: text(payload.projectName) || text(payload.projectType) || undefined,
+      orderNumber: text(payload.orderNumber) || undefined,
+      eventName: text(payload.eventName) || undefined,
       sourceApp: event.sourceApp,
       sourceEventId: event.id,
       flowId: event.flowId,
@@ -189,6 +192,33 @@ export async function createTicketFromEcosystemEvent(formData: FormData) {
     priority: ticket.priority === TicketPriority.URGENT ? "URGENT" : ticket.priority === TicketPriority.HIGH ? "HIGH" : "NORMAL",
     actionLabel: "Voir le ticket",
     actionUrl: `/dashboard/tickets/${ticket.id}`,
+  });
+
+  await sendEcosystemHandoff(process.env.API_METER_INGEST_URL ?? "https://api-meter.vercel.app/api/ecosystem/ingest", {
+    flowId: event.flowId,
+    sourceApp: "supportdesk-lite",
+    targetApp: "api-meter",
+    eventType: "ticket.created",
+    entityType: "ticket",
+    entityId: ticket.id,
+    customerName: ticket.requesterName,
+    customerEmail: ticket.requesterEmail,
+    title: "Ticket SupportDesk cree depuis le parcours reel",
+    description: `${ticket.requesterName} a un ticket lie a ${event.sourceApp}: ${event.title}.`,
+    payload: {
+      category: ticket.category,
+      priority: ticket.priority,
+      status: ticket.status,
+      linkedEntityType,
+      linkedEntityId,
+      projectName: text(payload.projectName) || text(payload.projectType) || undefined,
+      orderNumber: text(payload.orderNumber) || undefined,
+      eventName: text(payload.eventName) || undefined,
+      sourceApp: event.sourceApp,
+      sourceEventId: event.id,
+      flowId: event.flowId,
+    },
+    priority: ticket.priority === TicketPriority.URGENT ? "URGENT" : ticket.priority === TicketPriority.HIGH ? "HIGH" : "NORMAL",
   });
 
   revalidatePath("/dashboard");
@@ -224,7 +254,7 @@ export async function updateTicketStatus(formData: FormData) {
     await publishEcosystemEvent({
       flowId: ticket.flowId ?? undefined,
       sourceApp: "supportdesk-lite",
-      targetApps: ["clienthub", "api-meter"],
+      targetApp: "api-meter",
       eventType: "ticket.resolved",
       entityType: "ticket",
       entityId: ticket.id,
